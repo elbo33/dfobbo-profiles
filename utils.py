@@ -31,27 +31,57 @@ def read_and_parse_files(directory):
             for line in f:
                 parts = line.strip().split()
                 if len(parts) == 2:
-                    eval_num, obj_value = int(parts[0]), round(float(parts[1]), 3)
+                    eval_num, obj_value = int(parts[0]), float(parts[1])
                     all_values[file_key].append((eval_num, obj_value))
     
     return all_values
 
-def get_accuracy_value(file_key, all_values, current):
+def get_best_known_value(file):
     """
-    Computes the accuracy value.
+    Retrieves the last objective value from a file.
     """
+    with open(file, 'r') as f:
+        lines = f.readlines()
+        if not lines:
+            return None
+        last_line = lines[-1].strip().split()
+        if len(last_line) == 2:
+            return float(last_line[1])
+    return None
 
-    best_value = all_values[file_key][-1][1]
+def get_accuracy_value(file_key, all_values, current_eval):
+    """
+    Computes the accuracy value based on the evaluation number.
+    """
+    if file_key not in all_values:
+        return None
+    
     first_value = all_values[file_key][0][1]
-    current_value = all_values[file_key][current][1]
-
-    if best_value == first_value:
-        return None  
+    best_value = all_values[file_key][-1][1]
+    
+    current_value = next((obj_value for eval_num, obj_value in all_values[file_key] if eval_num == current_eval), None)
+    if current_value is None or best_value == first_value:
+        return None 
+    
     accuracy_value = (current_value - first_value) / (best_value - first_value)
     return accuracy_value
 
 def isTauSolved(accuracy, tau):
-    return accuracy >= 1-tau
+    return accuracy is not None and accuracy >= 1 - tau
+
+def findSmallestEvalTauSolved(file_key, all_values, tau):
+    """
+    Finds the smallest evaluation number where tau is solved.
+    """
+    if file_key not in all_values:
+        return None
+    
+    for eval_num, _ in all_values[file_key]:
+        accuracy = get_accuracy_value(file_key, all_values, eval_num)
+        if isTauSolved(accuracy, tau):
+            return eval_num
+    
+    return None
 
 def main():
     directory = "./Algo1"
@@ -63,8 +93,9 @@ def main():
     if not parsed_values:
         print("No valid data found in the provided directory.")
     else:
-        accuracy = get_accuracy_value('stats1.txt', parsed_values, 0)
-        print(accuracy)
-        print(isTauSolved(accuracy, 0))
+        accuracy = get_accuracy_value('stats1.txt', parsed_values, parsed_values['stats1.txt'][-1][0])
+        print("Accuracy:", accuracy)
+        print("Smallest Eval where Tau is solved:", findSmallestEvalTauSolved('stats1.txt', parsed_values, 1))
+
 if __name__ == "__main__":
     main()

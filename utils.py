@@ -36,6 +36,20 @@ def read_and_parse_files(directory):
     
     return all_values
 
+def get_accuracy_value(file_key, all_values, current):
+    """
+    Computes the accuracy value.
+    """
+
+    best_value = all_values[file_key][-1][1]
+    first_value = all_values[file_key][0][1]
+    current_value = all_values[file_key][current][1]
+
+    if best_value == first_value:
+        return None  
+    accuracy_value = (current_value - first_value) / (best_value - first_value)
+    return accuracy_value
+
 def main():
     directory = "./Algo1"
     if not os.path.exists(directory):
@@ -46,7 +60,8 @@ def main():
     if not parsed_values:
         print("No valid data found in the provided directory.")
     else:
-        print(parsed_values)
+        accuracy = get_accuracy_value('stats1.txt', parsed_values, -1)
+        print(accuracy)
 
 if __name__ == "__main__":
     main()

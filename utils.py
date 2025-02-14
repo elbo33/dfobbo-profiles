@@ -36,19 +36,6 @@ def read_and_parse_files(directory):
     
     return all_values
 
-def get_best_known_value(file):
-    """
-    Retrieves the last objective value from a file.
-    """
-    with open(file, 'r') as f:
-        lines = f.readlines()
-        if not lines:
-            return None
-        last_line = lines[-1].strip().split()
-        if len(last_line) == 2:
-            return float(last_line[1])
-    return None
-
 def get_accuracy_value(file_key, all_values, current_eval):
     """
     Computes the accuracy value based on the evaluation number.

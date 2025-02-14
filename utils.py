@@ -83,19 +83,4 @@ def findSmallestEvalTauSolved(file_key, all_values, tau):
     
     return None
 
-def main():
-    directory = "./Algo1"
-    if not os.path.exists(directory):
-        print(f"Error: Directory '{directory}' does not exist.")
-        return
-    
-    parsed_values = read_and_parse_files(directory)
-    if not parsed_values:
-        print("No valid data found in the provided directory.")
-    else:
-        accuracy = get_accuracy_value('stats1.txt', parsed_values, parsed_values['stats1.txt'][-1][0])
-        print("Accuracy:", accuracy)
-        print("Smallest Eval where Tau is solved:", findSmallestEvalTauSolved('stats1.txt', parsed_values, 1))
 
-if __name__ == "__main__":
-    main()

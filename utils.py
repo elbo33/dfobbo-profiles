@@ -50,6 +50,9 @@ def get_accuracy_value(file_key, all_values, current):
     accuracy_value = (current_value - first_value) / (best_value - first_value)
     return accuracy_value
 
+def isTauSolved(accuracy, tau):
+    return accuracy >= 1-tau
+
 def main():
     directory = "./Algo1"
     if not os.path.exists(directory):
@@ -60,8 +63,8 @@ def main():
     if not parsed_values:
         print("No valid data found in the provided directory.")
     else:
-        accuracy = get_accuracy_value('stats1.txt', parsed_values, -1)
+        accuracy = get_accuracy_value('stats1.txt', parsed_values, 0)
         print(accuracy)
-
+        print(isTauSolved(accuracy, 0))
 if __name__ == "__main__":
     main()

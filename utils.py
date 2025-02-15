@@ -76,15 +76,13 @@ def print_formatted_percentages(percentages_below_alpha):
     Prints the percentages_below_alpha dictionary in the format:
     AlgoX: (1, value1) (2, value2) ...
     """
-    # Extract algorithm names dynamically
     algo_names = list(percentages_below_alpha[1].keys())
 
-    # Print formatted output for each algorithm
     for algo in algo_names:
-        algo_label = algo.replace("./", "")  # Remove "./" from algorithm names
+        algo_label = algo.replace("./", "")  
         print(f"{algo_label}: ", end="")
         print(" ".join(f"({key}, {values[algo]:.2f})" for key, values in percentages_below_alpha.items()))
-        print()  # Blank line for separation between algorithms
+        print()  
 
 
 

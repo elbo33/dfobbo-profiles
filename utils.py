@@ -59,15 +59,33 @@ def isTauSolved(accuracy, tau):
 def findSmallestEvalTauSolved(file_key, all_values, tau):
     """
     Finds the smallest evaluation number where tau is solved.
+    If tau is not solved, returns infinity.
     """
     if file_key not in all_values:
-        return None
-    
+        return float('inf') 
+
     for eval_num, _ in all_values[file_key]:
         accuracy = get_accuracy_value(file_key, all_values, eval_num)
         if isTauSolved(accuracy, tau):
             return eval_num
-    
-    return None
+
+    return float('inf')  
+
+def print_formatted_percentages(percentages_below_alpha):
+    """
+    Prints the percentages_below_alpha dictionary in the format:
+    AlgoX: (1, value1) (2, value2) ...
+    """
+    # Extract algorithm names dynamically
+    algo_names = list(percentages_below_alpha[1].keys())
+
+    # Print formatted output for each algorithm
+    for algo in algo_names:
+        algo_label = algo.replace("./", "")  # Remove "./" from algorithm names
+        print(f"{algo_label}: ", end="")
+        print(" ".join(f"({key}, {values[algo]:.2f})" for key, values in percentages_below_alpha.items()))
+        print()  # Blank line for separation between algorithms
+
+
 
 

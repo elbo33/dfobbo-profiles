@@ -1,8 +1,8 @@
-import os
-from utils import read_and_parse_files, findSmallestEvalTauSolved
+import sys
+from utils import *
 
 ALGORITHM_DIRS = ["./Algo1", "./Algo2", "./Algo3"] 
-TAU = 0.1
+TAU = 0.01
 
 def compare_algorithms_tau_solved():
     """
@@ -10,87 +10,79 @@ def compare_algorithms_tau_solved():
     Keeps track of the smallest tau solved value for each algorithm at each iteration.
     """
     parsed_data = {algo_dir: read_and_parse_files(algo_dir) for algo_dir in ALGORITHM_DIRS}
-    results = {}
-    eval_counts = {algo_dir: [] for algo_dir in ALGORITHM_DIRS}
     min_tau_solved = {algo_dir: [] for algo_dir in ALGORITHM_DIRS}  
     
     for file_num in range(1, 160): 
         file_name = f"stats{file_num}.txt"
-        best_eval = float('inf')
         evals = {}
-        
+        best_eval = float('inf')
+
         for algo_dir, parsed_values in parsed_data.items():
-            if file_name not in parsed_values:
-                continue
-            
             eval_num = findSmallestEvalTauSolved(file_name, parsed_values, TAU)
-            if eval_num is not None:
-                evals[algo_dir] = eval_num
+            evals[algo_dir] = eval_num  
+            
+            if eval_num != float('inf'):  
                 best_eval = min(best_eval, eval_num)
-                min_tau_solved[algo_dir].append(eval_num)  
-        
-        results[file_name] = evals
+
         for algo_dir, eval_num in evals.items():
-            eval_counts[algo_dir].append(eval_num / best_eval if best_eval > 0 else 1)
-    
-    return results, min_tau_solved
+            min_tau_solved[algo_dir].append(eval_num)  
+
+    return min_tau_solved
+
 
 def calculate_algorithm_ratios(min_tau_solved):
     """
     Calculates the ratio of each algorithm's min tau solved value compared to the global min tau at each iteration.
     Returns a list of ratios for each algorithm over all iterations.
+    If an algorithm doesn't solve tau in an iteration, writes 'inf'.
     """
     algo_ratios = {algo: [] for algo in ALGORITHM_DIRS}
     
     num_iterations = max(len(values) for values in min_tau_solved.values())
-    
+
     for i in range(num_iterations):
-        global_min = float('inf')
-        current_values = {}
-        
+        current_values = {
+            algo: min_tau_solved[algo][i] 
+            for algo in ALGORITHM_DIRS if i < len(min_tau_solved[algo]) and min_tau_solved[algo][i] != float('inf')
+        }
+
+        global_min = min(current_values.values()) if current_values else float('inf')
+
         for algo in ALGORITHM_DIRS:
             if i < len(min_tau_solved[algo]):
-                current_values[algo] = min_tau_solved[algo][i]
-                global_min = min(global_min, min_tau_solved[algo][i])
-        
-        if global_min == float('inf'):
-            continue
-        
-        for algo in ALGORITHM_DIRS:
-            if i < len(min_tau_solved[algo]):
-                algo_ratios[algo].append(min_tau_solved[algo][i] / global_min if global_min > 0 else 1)
+                if min_tau_solved[algo][i] == float('inf') or global_min == float('inf'):
+                    algo_ratios[algo].append("inf") 
+                else:
+                    algo_ratios[algo].append(min_tau_solved[algo][i] / global_min if global_min > 0 else 1)
     
     return algo_ratios
 
-def calculate_percentage_below_alpha(algo_ratios, alpha):
+def calculate_percentage_below_alpha(algo_ratios, alpha_range):
     """
-    Calculates the percentage of ratios per algorithm that are smaller than alpha.
+    Calculates the percentage of ratios per algorithm that are smaller than different alpha values.
+
     """
-    percentage_below_alpha = {}
-    
-    for algo, ratios in algo_ratios.items():
-        count_below_alpha = sum(1 for ratio in ratios if ratio <= alpha)
-        percentage_below_alpha[algo] = (count_below_alpha / len(ratios)) * 100 if ratios else 0
-    
-    return percentage_below_alpha
+    percentages_below_alpha = {alpha: {} for alpha in range(1, alpha_range)}
+
+    for alpha in range(1, alpha_range):
+        for algo, ratios in algo_ratios.items():
+            valid_ratios = [float(ratio) for ratio in ratios if ratio != "inf"]
+            count_below_alpha = sum(1 for ratio in valid_ratios if ratio <= alpha)
+            
+            percentages_below_alpha[alpha][algo] = (count_below_alpha / len(ratios)) * 100 if valid_ratios else 0
+
+    return percentages_below_alpha
 
 def main():
-    results, min_tau_solved = compare_algorithms_tau_solved()
-    
-    for file, evals in results.items():
-        best_algo = min(evals, key=evals.get, default="None")
-        print(f"{file}: Solved first by {best_algo}")
-    
+    if len(sys.argv) != 3:
+        print("Usage: python script.py <tau> <alpha>")
+        sys.exit(1)
+    tau = float(sys.argv[1])
+    alpha = float(sys.argv[2])
+    min_tau_solved = compare_algorithms_tau_solved()
     algo_ratios = calculate_algorithm_ratios(min_tau_solved)
-    print("\nAlgorithm Performance Ratios per Iteration:")
-    for algo, ratios in algo_ratios.items():
-        print(f"{algo}: {ratios}")
-    
-    alpha = 1.0 
-    percentages = calculate_percentage_below_alpha(algo_ratios, alpha)
-    print(f"\nPercentage of Ratios Below Alpha <= {alpha}")
-    for algo, percentage in percentages.items():
-        print(f"{algo}: {percentage}%")
+    percentages_below_alpha = calculate_percentage_below_alpha(algo_ratios, 20)
+    print_formatted_percentages(percentages_below_alpha)
 
 if __name__ == "__main__":
     main()

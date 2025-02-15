@@ -1,5 +1,13 @@
 import os
 
+ALGORITHM_DIRS = ["./Algo1", "./Algo2", "./Algo3"]
+
+def load_parsed_data():
+    """
+    Loads and parses data for each algorithm.
+    """
+    return {algo_dir: read_and_parse_files(algo_dir) for algo_dir in ALGORITHM_DIRS}
+
 def get_files_from_directory(directory):
     """
     Retrieves a sorted list of file paths from the given directory.

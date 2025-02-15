@@ -2,9 +2,8 @@ import sys
 from utils import *
 
 ALGORITHM_DIRS = ["./Algo1", "./Algo2", "./Algo3"] 
-TAU = 0.01
 
-def compare_algorithms_tau_solved():
+def compare_algorithms_tau_solved(tau):
     """
     Determines which algorithm solves tau first for each file.
     Keeps track of the smallest tau solved value for each algorithm at each iteration.
@@ -18,7 +17,7 @@ def compare_algorithms_tau_solved():
         best_eval = float('inf')
 
         for algo_dir, parsed_values in parsed_data.items():
-            eval_num = findSmallestEvalTauSolved(file_name, parsed_values, TAU)
+            eval_num = findSmallestEvalTauSolved(file_name, parsed_values, tau)
             evals[algo_dir] = eval_num  
             
             if eval_num != float('inf'):  
@@ -79,9 +78,9 @@ def main():
         sys.exit(1)
     tau = float(sys.argv[1])
     alpha = float(sys.argv[2])
-    min_tau_solved = compare_algorithms_tau_solved()
+    min_tau_solved = compare_algorithms_tau_solved(tau)
     algo_ratios = calculate_algorithm_ratios(min_tau_solved)
-    percentages_below_alpha = calculate_percentage_below_alpha(algo_ratios, 20)
+    percentages_below_alpha = calculate_percentage_below_alpha(algo_ratios, alpha)
     print_formatted_percentages(percentages_below_alpha)
 
 if __name__ == "__main__":

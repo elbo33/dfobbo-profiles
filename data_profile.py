@@ -1,22 +1,25 @@
 import sys
 from utils import DataProcessor
 
-def precompute_eval_numbers(parsed_data, tau):
+def precompute_eval_numbers(tau):
     """
     Precompute the smallest evaluation number for each problem and algorithm.
     """
     eval_numbers = {algo_dir: {} for algo_dir in DataProcessor.ALGORITHM_DIRS}
-    
+
     for file_num in range(1, 160): 
         file_name = f"stats{file_num}.txt"
-        
-        for algo_dir, parsed_values in parsed_data.items():
+
+        for algo_dir in DataProcessor.ALGORITHM_DIRS:
+            parsed_values = DataProcessor.parsed_data.get(algo_dir, {})  
+            
             if file_name in parsed_values:
-                eval_numbers[algo_dir][file_name] = DataProcessor.findSmallestEvalTauSolved(file_name, parsed_values, tau)
+                eval_numbers[algo_dir][file_name] = DataProcessor.findSmallestEvalTauSolved(algo_dir, file_name, tau)
             else:
-                eval_numbers[algo_dir][file_name] = None
-    
+                eval_numbers[algo_dir][file_name] = None 
+
     return eval_numbers
+
 
 def count_valid_instances(eval_numbers, k):
     """
@@ -51,8 +54,8 @@ def main():
         sys.exit(1)
     tau = float(sys.argv[1])
     k_value = int(sys.argv[2])
-    parsed_data = DataProcessor.load_parsed_data()
-    eval_numbers = precompute_eval_numbers(parsed_data, tau)
+    DataProcessor.load_parsed_data()
+    eval_numbers = precompute_eval_numbers(tau)
     k_ratios = calculate_k_ratios(eval_numbers, k_value)
     DataProcessor.print_formatted_percentages(k_ratios)
 

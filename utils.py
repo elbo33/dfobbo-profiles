@@ -111,6 +111,9 @@ class DataProcessor:
         """
         Finds the smallest evaluation number where tau is solved for a specific algorithm.
         """
+        if algo_dir not in cls.parsed_data or file_key not in cls.parsed_data[algo_dir]:
+            return float('inf') 
+    
         for eval_num, _ in cls.parsed_data[algo_dir][file_key]:
             accuracy = cls.get_accuracy_value(file_key, eval_num)  
             if cls.isTauSolved(accuracy, tau):

@@ -107,22 +107,16 @@ class DataProcessor:
         return accuracy is not None and accuracy >= 1 - tau
 
     @classmethod
-    def findSmallestEvalTauSolved(cls, file_key, tau):
+    def findSmallestEvalTauSolved(cls, algo_dir, file_key, tau):
         """
-        Finds the smallest evaluation number where tau is solved.
-        If tau is not solved, returns infinity.
+        Finds the smallest evaluation number where tau is solved for a specific algorithm.
         """
-        combined_values = cls.get_combined_values(file_key)
-        
-        if not combined_values:
-            return float('inf') 
-
-        for eval_num, _ in combined_values:
-            accuracy = cls.get_accuracy_value(file_key, eval_num)
+        for eval_num, _ in cls.parsed_data[algo_dir][file_key]:
+            accuracy = cls.get_accuracy_value(file_key, eval_num)  
             if cls.isTauSolved(accuracy, tau):
                 return eval_num
 
-        return float('inf')  
+        return float('inf')
     
     @classmethod
     def print_formatted_percentages(cls, percentages_below_alpha):

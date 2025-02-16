@@ -7,24 +7,22 @@ def compare_algorithms_tau_solved(tau):
     Keeps track of the smallest tau solved value for each algorithm at each iteration.
     """
     DataProcessor.load_parsed_data()  
-    min_tau_solved = {algo_dir: [] for algo_dir in DataProcessor.ALGORITHM_DIRS}  
-    
+
+    min_tau_solved = {algo_dir: [] for algo_dir in DataProcessor.ALGORITHM_DIRS}
+
     for file_num in range(1, 160): 
         file_name = f"stats{file_num}.txt"
-        evals = {}
-        best_eval = float('inf')
 
-        for algo_dir in DataProcessor.ALGORITHM_DIRS:
-            eval_num = DataProcessor.findSmallestEvalTauSolved(file_name, tau)
-            evals[algo_dir] = eval_num  
-            
-            if eval_num != float('inf'):  
-                best_eval = min(best_eval, eval_num)
+        for algo_dir in DataProcessor.ALGORITHM_DIRS:  
+            if algo_dir not in DataProcessor.parsed_data:
+                min_tau_solved[algo_dir].append(float('inf'))  
+                continue
 
-        for algo_dir, eval_num in evals.items():
-            min_tau_solved[algo_dir].append(eval_num)  
+            eval_num = DataProcessor.findSmallestEvalTauSolved(algo_dir, file_name, tau)  
+            min_tau_solved[algo_dir].append(eval_num)
 
     return min_tau_solved
+
 
 def calculate_algorithm_ratios(min_tau_solved):
     """
@@ -50,8 +48,9 @@ def calculate_algorithm_ratios(min_tau_solved):
                     algo_ratios[algo].append("inf") 
                 else:
                     algo_ratios[algo].append(min_tau_solved[algo][i] / global_min if global_min > 0 else 1)
-    
+
     return algo_ratios
+
 
 def calculate_percentage_below_alpha(algo_ratios, alpha_range):
     """

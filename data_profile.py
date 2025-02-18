@@ -43,7 +43,7 @@ def count_valid_instances(eval_numbers: Dict[str, Dict[str, int]], k: int) -> Tu
         for algo_dir in DataProcessor.ALGORITHM_DIRS:
             eval_num = eval_numbers.get(algo_dir, {}).get(file_name)
 
-            if eval_num is not None and eval_num <= k * file_number:
+            if eval_num is not None and eval_num <= k * file_number / 3:
                 count_valid[algo_dir] += 1
 
     return count_valid, TOTAL_PROBLEMS

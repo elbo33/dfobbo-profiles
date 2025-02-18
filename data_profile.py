@@ -1,5 +1,10 @@
 import sys
+import re
+from typing import Dict, Tuple
 from utils import DataProcessor
+
+TOTAL_PROBLEMS = 159  
+FILENAME_PATTERN = re.compile(r"stats(\d+)\.txt")  
 
 def precompute_eval_numbers(tau):
     """
@@ -21,20 +26,28 @@ def precompute_eval_numbers(tau):
     return eval_numbers
 
 
-def count_valid_instances(eval_numbers, k):
+def count_valid_instances(eval_numbers: Dict[str, Dict[str, int]], k: int) -> Tuple[Dict[str, int], int]:
     """
-    Counts instances where the lowest evaluation number is <= k for each algorithm.
+    Counts instances where the lowest evaluation number is <= k * file_number for each algorithm.
+
     """
     count_valid = {algo_dir: 0 for algo_dir in DataProcessor.ALGORITHM_DIRS}
-    total_problems = 159
-    
-    for file_name in eval_numbers[DataProcessor.ALGORITHM_DIRS[0]]: 
+
+    for file_name in eval_numbers.get(DataProcessor.ALGORITHM_DIRS[0], {}):
+        match = FILENAME_PATTERN.match(file_name) 
+        if match:
+            file_number = int(match.group(1))  
+        else:
+            continue 
+
         for algo_dir in DataProcessor.ALGORITHM_DIRS:
-            eval_num = eval_numbers[algo_dir][file_name]
-            if eval_num is not None and eval_num <= k * (k + 1) / 2:
+            eval_num = eval_numbers.get(algo_dir, {}).get(file_name)
+
+            if eval_num is not None and eval_num <= k * file_number:
                 count_valid[algo_dir] += 1
-    
-    return count_valid, total_problems
+
+    return count_valid, TOTAL_PROBLEMS
+
 
 def calculate_k_ratios(eval_numbers, max_k):
     """
